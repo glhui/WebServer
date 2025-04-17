@@ -4,7 +4,7 @@ file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.h")
 
 add_library(libserver_base ${SOURCES})
 
-target_link_libraries(libserver_base pthread rt)
+target_link_libraries(libserver_base)
 set_target_properties(libserver_base PROPERTIES OUTPUT_NAME "server_base")
 
 target_include_directories(libserver_base
@@ -13,4 +13,8 @@ target_include_directories(libserver_base
         $<INSTALL_INTERFACE:include>
 )
 
-add_subdirectory(tests)
+option(ENABLE_TESTS "Enable building tests" ON)
+
+if (ENABLE_TESTS)
+    add_subdirectory(tests)
+endif()

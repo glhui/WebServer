@@ -22,16 +22,15 @@ std::condition_variable cv;
 
 /**
  * @brief Basic test for `Condition` class.
- * å¯èƒ½å­˜åœ¨æ½œåœ¨bugï¼Œworkerçº¿ç¨‹æ˜¯å¦éœ€è¦è§£é”
  */
 void testBasicWaitNotify() {
     ready = false;
     std::thread worker([] {
-        condition.wait(); // å·¥ä½œçº¿ç¨‹ç­‰å¾…é”
+        condition.wait(); // ¹¤×÷Ïß³ÌµÈ´ıËø
         std::cout << "Case 1 passed: worker resumed\n";
     });
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // ç¡®ä¿ worker å·²ç­‰å¾…
+    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // È·±£ worker ÒÑµÈ´ı
     {
         std::cout << "main thread set ready\n";
         ready = true;
@@ -44,8 +43,8 @@ void testBasicWaitNotify() {
 
 /**
  * @brief Test the usage of `std::condition_variable`.
- * é€šè¿‡æ ‡å‡†åº“æµ‹è¯•ï¼Œæ¡ä»¶å˜é‡çš„waitå’Œnotifyå¿…é¡»æ­é…ä½¿ç”¨ã€‚
- * æ— è®ºæ¡ä»¶å˜é‡çš„é”æ˜¯å¦ä¸Šé”ï¼Œåªè¦è°ƒç”¨äº†waitå°±ä¸€å®šä¼šé™·å…¥ç­‰å¾…çŠ¶æ€ã€‚
+ * Í¨¹ı±ê×¼¿â²âÊÔ£¬Ìõ¼ş±äÁ¿µÄwaitºÍnotify±ØĞë´îÅäÊ¹ÓÃ¡£
+ * ÎŞÂÛÌõ¼ş±äÁ¿µÄËøÊÇ·ñÉÏËø£¬Ö»Òªµ÷ÓÃÁËwait¾ÍÒ»¶¨»áÏİÈëµÈ´ı×´Ì¬¡£
  */
 void stdConditionTest() {
     std::thread worker([] {
@@ -87,7 +86,7 @@ void testNotifyAllThreads() {
     std::cout << "Case 2 passed: all threads notified\n";
 }
 
-void test_notify_all_multiple_threads() {
+void stdNotifyAllMultipleThreadsTest() {
     ready = false;
     const int thread_count = 5;
     int wake_count = 0;
@@ -113,9 +112,37 @@ void test_notify_all_multiple_threads() {
     std::cout << "Case 2 passed: all threads notified\n";
 }
 
+void testTimeWaitOut() {
+    std::thread worker([] {
+        auto cur_time = std::chrono::steady_clock::now();
+        condition.waitForSeconds(5);
+        auto end_time = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - cur_time).count();
+        assert(duration > 5000 && "[error] Ã»ÓĞµÈ´ı×ã¹»µÄÊ±¼ä¾Í±»»½ĞÑ");
+        std::cout << "[pass] ²âÊÔÍ¨¹ı£¬ µÈ´ıÁË×ã¹»³¤µÄÊ±¼ä\n";
+    });
+    std::cout << "main thread sleep for 6s\n";
+    std::this_thread::sleep_for(std::chrono::seconds(6));
+    worker.join();
+}
+
+void testTimeWaitSuccess() {
+    std::thread worker([] {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        condition.notify();
+    });
+
+    auto status = condition.waitForSeconds(1);
+    assert(status && "[error] µÈ´ıÊ±¼äÄÚÃ»ÓĞ±»»½ĞÑ");
+    std::cout << "[pass] ²âÊÔÍ¨¹ı£¬ Ö¸¶¨Ê±¼äÄÚ±»»½ĞÑ\n";
+    worker.join();
+}
+
 int main() {
     // testBasicWaitNotify();
     // stdConditionTest();
-    testNotifyAllThreads();
-    // test_notify_all_multiple_threads();
+    // testNotifyAllThreads();
+    // stdNotifyAllMultipleThreadsTest();
+    // testTimeWaitOut();
+    // testTimeWaitSuccess();
 }

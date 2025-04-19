@@ -5,6 +5,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <iostream>
 
 #include <CountDownLatch.h>
 #include <noncopyable.h>
@@ -25,13 +26,19 @@ public:
     DWORD tid() const { return tid_; }
     const std::string& name() const { return name_; }
 
+    static unsigned __stdcall startThread(void* arg);
+
 private:
     void setDefaultName();
     bool started_;
     bool joined_;
     HANDLE threadHandle_;      // Windows thread handle
-    DWORD tid_;                // Windows thread ID
+    unsigned int tid_;                // Windows thread ID
     ThreadFunc func_;
     std::string name_;
     CountDownLatch latch_;
 };
+
+void setThreadName(const std::string& name) {
+  // TODO(setting thread name)
+}

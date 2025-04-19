@@ -51,7 +51,7 @@ struct ThreadData {
         }
 
         CurrentThread::t_threadName = name_.empty() ? "Thread" : name_.c_str();
-        setThreadName(CurrentThread::t_threadName);
+        // setThreadName(CurrentThread::t_threadName); TODO(help debug)
 
         func_();
 

@@ -11,3 +11,4 @@ endfunction()
 # 使用示例
 #add_test_executable(MutexLockTest MutexLockTest.cpp)
 add_test_executable(ConditionTest ConditionTest.cpp)
+add_test_executable(CountDownLatchTest CountDownLatchTest.cpp)

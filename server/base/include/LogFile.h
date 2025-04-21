@@ -10,7 +10,7 @@
 
 class LogFile : noncopyable {
 public:
-    LogFile(std::string basename, int flushEveryN = 1024);
+    LogFile(const std::string& basename, int flushEveryN = 1024);
     ~LogFile();
 
     void append(const char *logline, int len);
@@ -21,7 +21,8 @@ private:
       void append_unlocked(const char *logline, int len);
 
       std::string basename_;
-      const int FlushEveryN_;
+      const int flushEveryN_;
+
       int count_;
       std::unique_ptr<MutexLock> mutex_lock_;
       std::unique_ptr<AppendFile> file_;

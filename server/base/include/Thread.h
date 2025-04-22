@@ -1,6 +1,7 @@
 #pragma once
 
 #include <windows.h>
+#include <processthreadsapi.h>
 #include <thread>
 #include <functional>
 #include <memory>
@@ -39,6 +40,6 @@ private:
     CountDownLatch latch_;
 };
 
-void setThreadName(const std::string& name) {
-  // TODO(setting thread name)
-}
+// void setThreadName(const std::string& name) {
+//   // TODO(setting thread name need fix)
+// }

@@ -8,7 +8,7 @@
 // public interface
 #include <FileUtil.h>
 
-AppendFile::AppendFile(std::string filename) : fp_(fopen(filename.c_str(), "ae")) {
+AppendFile::AppendFile(std::string filename) : fp_(fopen(filename.c_str(), "a")) {
     setvbuf(fp_, buffer_, _IOFBF, sizeof buffer_);
 }
 
@@ -32,6 +32,7 @@ void AppendFile::append(const char* logline, const size_t len) {
 void AppendFile::flush() { fflush(fp_); }
 
 size_t AppendFile::write(const char* logline, size_t len) {
-  return fwrite(logline, 1, len, fp_);
+	size_t written = fwrite(logline, 1, len, fp_);
+	return written;
 }
 

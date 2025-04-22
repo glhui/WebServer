@@ -59,11 +59,14 @@ void AsyncLogging::threadFunc() {
     assert(newBuffer2 && newBuffer2->length() == 0);
     assert(buffersToWrite.empty());
 
+    std::cout << "Begin the Block Code\n";
     {
-      MutexLockGuard lock(mutex_);
-      if (buffers_.empty())  // unusual usage!
+      // MutexLockGuard lock(mutex_); I want's use this, but is use this, and cond_.wait run, maybe deadlock
+      mutex_.lock(); // Bad coding practice
+      if (buffers_.empty())  // I want if buffers is empty, it can be wait for something written
       {
-        cond_.waitForSeconds(flushInterval_);
+        mutex_.unlock();
+        cond_.wait();
       }
       buffers_.push_back(currentBuffer_);
       currentBuffer_.reset();
@@ -73,8 +76,9 @@ void AsyncLogging::threadFunc() {
       if (!nextBuffer_) {
         nextBuffer_ = std::move(newBuffer2);
       }
+      mutex_.unlock(); // Bad coding practice
     }
-
+    std::cout << "End the Block Code\n";
     assert(!buffersToWrite.empty());
 
     if (buffersToWrite.size() > 25) {
@@ -108,5 +112,6 @@ void AsyncLogging::threadFunc() {
     buffersToWrite.clear();
     output.flush();
   }
+  std::cout << "Running in there after call stop\n";
   output.flush();
 }

@@ -5,8 +5,8 @@
 #include "noncopyable.h"
 
 class AsyncLogging;
-const int kSmallBuffer = 4000;
-const int kLargeBuffer = 4000 * 1000;
+const int kSmallBuffer = 100;
+const int kLargeBuffer = 60 * 2;
 
 template <int SIZE>
 class FixedBuffer : public noncopyable

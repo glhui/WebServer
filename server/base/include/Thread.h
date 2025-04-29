@@ -1,15 +1,13 @@
 #pragma once
 
-#include <windows.h>
-#include <processthreadsapi.h>
-#include <thread>
+#include <pthread.h>
+#include <sys/syscall.h>
+#include <unistd.h>
 #include <functional>
 #include <memory>
 #include <string>
-#include <iostream>
-
-#include <CountDownLatch.h>
-#include <noncopyable.h>
+#include "CountDownLatch.h"
+#include "noncopyable.h"
 
 class Thread : noncopyable {
 public:
@@ -20,21 +18,17 @@ public:
     ~Thread();
 
     void start();
-
     int join();
-
     bool started() const { return started_; }
-    DWORD tid() const { return tid_; }
+    pid_t tid() const { return tid_; }
     const std::string& name() const { return name_; }
-
-    static unsigned __stdcall startThread(void* arg);
 
 private:
     void setDefaultName();
     bool started_;
     bool joined_;
-    HANDLE threadHandle_;      // Windows thread handle
-    unsigned int tid_;                // Windows thread ID
+    pthread_t pthreadId_;
+    pid_t tid_;
     ThreadFunc func_;
     std::string name_;
     CountDownLatch latch_;

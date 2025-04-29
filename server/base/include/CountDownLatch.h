@@ -1,9 +1,8 @@
 #pragma once
 
-// public interface
-#include <noncopyable.h>
-#include <Condition.h>
-#include <MutexLock.h>
+#include "Condition.h"
+#include "MutexLock.h"
+#include "noncopyable.h"
 
 class CountDownLatch : noncopyable {
 public:
@@ -13,10 +12,8 @@ public:
 
     void countDown();
 
-    int getCount() const;
-
 private:
-    mutable MutexLock mutex_lock_;
+    mutable MutexLock mutex_;
     Condition condition_;
     int count_;
 };

@@ -2,7 +2,7 @@
 
 #include <string>
 // public interface
-#include <noncopyable.h>
+#include "noncopyable.h"
 
 class AppendFile : public noncopyable {
 public:

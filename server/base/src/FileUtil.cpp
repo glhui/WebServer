@@ -6,10 +6,10 @@
 #include <sys/stat.h>
 #include <stdio.h>
 // public interface
-#include <FileUtil.h>
+#include "FileUtil.h"
 
 AppendFile::AppendFile(std::string filename) : fp_(fopen(filename.c_str(), "a")) {
-    setvbuf(fp_, buffer_, _IOFBF, sizeof buffer_);
+    setbuffer(fp_, buffer_, sizeof buffer_); // windows 上这里与linux上不同
 }
 
 AppendFile::~AppendFile() { fclose(fp_); }

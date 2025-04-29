@@ -16,29 +16,29 @@
 #include "Thread.h"
 
 namespace CurrentThread {
-    thread_local int t_cachedTid = 0;
-    thread_local char t_tidString[32];
-    thread_local int t_tidStringLen = 6;
-    thread_local const char* t_threadName = "unknown";
+    __thread int t_cachedTid = 0;
+    __thread char t_tidString[32];
+    __thread int t_tidStringLength = 6;
+    __thread const char* t_threadName = "default";
 }
 
+pid_t gettid() { return static_cast<pid_t>(::syscall(SYS_gettid)); }
+
 void CurrentThread::cacheTid() {
-    if (CurrentThread::t_cachedTid == 0) {
-        CurrentThread::t_cachedTid = ::GetCurrentThreadId();
-        int len = snprintf(CurrentThread::t_tidString, sizeof(CurrentThread::t_tidString), "%d", CurrentThread::t_cachedTid);
-        assert(len < sizeof(CurrentThread::t_tidString));
-        CurrentThread::t_tidStringLen = len;
+    if (t_cachedTid == 0) {
+      t_cachedTid = gettid();
+      t_tidStringLength = snprintf(t_tidString, sizeof t_tidString, "%5d ", t_cachedTid);
     }
-}
+  }
 
 struct ThreadData {
     using ThreadFunc = std::function<void()>;
     ThreadFunc func_;
     std::string name_;
-    unsigned int* tid_;
+    pid_t* tid_;
     CountDownLatch* latch_;
 
-    ThreadData(const ThreadFunc& func, const std::string& name, unsigned int* tid, CountDownLatch* latch)
+    ThreadData(const ThreadFunc& func, const std::string& name, pid_t *tid_;, CountDownLatch* latch)
         : func_(func), name_(name), tid_(tid), latch_(latch) {}
 
     void runInThread() {
@@ -51,7 +51,7 @@ struct ThreadData {
         }
 
         CurrentThread::t_threadName = name_.empty() ? "Thread" : name_.c_str();
-        // setThreadName(CurrentThread::t_threadName); TODO(help debug)
+        prctl(PR_SET_NAME, CurrentThread::t_threadName);
 
         func_();
 
@@ -59,24 +59,17 @@ struct ThreadData {
     }
 };
 
-unsigned __stdcall Thread::startThread(void* arg) {
-    ThreadData* data = static_cast<ThreadData*>(arg);
-    data->runInThread();
-    delete data;
-    return 0;
-}
-
 void* startThread(void* obj) {
     ThreadData* data = static_cast<ThreadData*>(obj);
     data->runInThread();
     delete data;
     return NULL;
-}
+  }
 
 Thread::Thread(const ThreadFunc& func, const std::string& n)
     : started_(false),
       joined_(false),
-      threadHandle_(0),
+      pthreadId_(0),
       tid_(0),
       func_(func),
       name_(n),
@@ -85,7 +78,7 @@ Thread::Thread(const ThreadFunc& func, const std::string& n)
 }
 
 Thread::~Thread() {
-    if (started_ && !joined_ && threadHandle_) CloseHandle(threadHandle_);
+    if (started_ && !joined_) pthread_detach(pthreadId_);
 }
 
 void Thread::setDefaultName() {
@@ -100,8 +93,7 @@ void Thread::start() {
     assert(!started_);
     started_ = true;
     ThreadData* data = new ThreadData(func_, name_, &tid_, &latch_);
-    threadHandle_ = (HANDLE)_beginthreadex(nullptr, 0, &Thread::startThread, data, 0, &tid_);
-    if (threadHandle_ == 0) {
+    if (pthread_create(&pthreadId_, NULL, &startThread, data)) {
         started_ = false;
         delete data;
     } else {
@@ -114,9 +106,5 @@ int Thread::join() {
     assert(started_);
     assert(!joined_);
     joined_ = true;
-    WaitForSingleObject(threadHandle_, INFINITE);
-    int retVal = 0;
-    CloseHandle(threadHandle_);
-    threadHandle_ = nullptr;
-    return retVal;
+    return pthread_join(pthreadId_, NULL);
 }

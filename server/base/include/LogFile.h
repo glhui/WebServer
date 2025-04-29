@@ -1,12 +1,10 @@
 #pragma once
 
-// std lib
 #include <memory>
 #include <string>
-// public interface
-#include <FileUtil.h>
-#include <MutexLock.h>
-#include <noncopyable.h>
+#include "FileUtil.h"
+#include "MutexLock.h"
+#include "noncopyable.h"
 
 class LogFile : noncopyable {
 public:
@@ -24,6 +22,6 @@ private:
       const int flushEveryN_;
 
       int count_;
-      std::unique_ptr<MutexLock> mutex_lock_;
+      std::unique_ptr<MutexLock> mutex_;
       std::unique_ptr<AppendFile> file_;
 };

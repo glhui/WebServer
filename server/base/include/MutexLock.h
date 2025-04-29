@@ -1,34 +1,36 @@
 #pragma once
 
-// public interface
-#include <noncopyable.h>
-// std lib
-#include <mutex> // TODO(add linux support)
+
+#include "noncopyable.h" 
+#include <pthread.h>
+#include <cstdio>
 
 
 class MutexLock : private noncopyable {
 public:
-    MutexLock() = default;
-    ~MutexLock() = default;
+    MutexLock() {
+        pthread_mutex_init(&mutex_, NULL);
+    };
+    ~MutexLock() {
+        pthread_mutex_destroy(&mutex_);
+    };
 
     void lock() {
-        mutex_.lock();
+        pthread_mutex_lock(&mutex_);
     }
 
     void unlock() {
-        mutex_.unlock();
+        pthread_mutex_unlock(&mutex_);
     }
 
-    bool tryLock() {
-        return mutex_.try_lock();
-    }
-
-    std::mutex & getUnderlyingMutex() {
-        return mutex_;
+    pthread_mutex_t *get() {
+        return &mutex_;
     }
 
 private:
-    std::mutex mutex_;
+    pthread_mutex_t mutex_;
+
+    friend class Condition;
 };
 
 class MutexLockGuard : noncopyable {

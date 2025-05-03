@@ -10,7 +10,7 @@
 #include <time.h>
 #include <sys/time.h>
 
-static std::once_flag  onceFlag;
+static pthread_once_t once_control_ = PTHREAD_ONCE_INIT;
 static std::unique_ptr<AsyncLogging> AsyncLogger_;
 
 std::string Logger::logFileName_ = "./WebServer.log";
@@ -23,7 +23,7 @@ void once_init()
 
 void output(const char* msg, int len)
 {
-    std::call_once(onceFlag, once_init);
+    pthread_once(&once_control_, once_init);
     AsyncLogger_->append(msg, len);
 }
 

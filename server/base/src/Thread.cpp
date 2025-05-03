@@ -2,18 +2,21 @@
 // Created by 19948 on 2025/4/15.
 //
 
-// std lib
-#include <functional>
-#include <iostream>
-#include <string>
-#include <thread>
-#include <sstream>
-#include <cassert>
-#include <Windows.h>
-
-// public interface
-#include "CurrentThread.h"
 #include "Thread.h"
+#include <assert.h>
+#include <errno.h>
+#include <linux/unistd.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <sys/prctl.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <memory>
+#include "CurrentThread.h"
+
+
+#include <iostream>
+using namespace std;
 
 namespace CurrentThread {
     __thread int t_cachedTid = 0;
@@ -38,7 +41,8 @@ struct ThreadData {
     pid_t* tid_;
     CountDownLatch* latch_;
 
-    ThreadData(const ThreadFunc& func, const std::string& name, pid_t *tid_;, CountDownLatch* latch)
+    ThreadData(const ThreadFunc& func, const std::string& name, pid_t *tid, 
+        CountDownLatch* latch)
         : func_(func), name_(name), tid_(tid), latch_(latch) {}
 
     void runInThread() {

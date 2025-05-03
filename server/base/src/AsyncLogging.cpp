@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <functional>
+#include <iostream>
 
 #include "LogFile.h"
 #include "AsyncLogging.h"
